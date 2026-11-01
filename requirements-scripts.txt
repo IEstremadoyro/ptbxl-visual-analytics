@@ -1,0 +1,4 @@
+# Solo para regenerar resultados con scripts/ (interpretabilidad y patrón de los perdidos)
+-r requirements.txt
+torch>=2.2
+scikit-learn>=1.3

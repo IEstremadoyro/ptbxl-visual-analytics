@@ -1,0 +1,82 @@
+{
+ "clases": [
+  "NORM",
+  "MI",
+  "STTC",
+  "CD",
+  "HYP"
+ ],
+ "matriz": [
+  [
+   9514,
+   1,
+   33,
+   415,
+   5
+  ],
+  [
+   1,
+   5469,
+   1339,
+   1794,
+   818
+  ],
+  [
+   33,
+   1339,
+   5235,
+   1066,
+   1509
+  ],
+  [
+   415,
+   1794,
+   1066,
+   4898,
+   787
+  ],
+  [
+   5,
+   818,
+   1509,
+   787,
+   2649
+  ]
+ ],
+ "registros_total": 21799,
+ "sin_superclase": 411,
+ "una_superclase": 16244,
+ "varias_superclases": 5144,
+ "por_clase": [
+  {
+   "clase": "NORM",
+   "registros": 9514,
+   "con_una_sola_superclase": 9069,
+   "perdida_%": 4.7
+  },
+  {
+   "clase": "MI",
+   "registros": 5469,
+   "con_una_sola_superclase": 2532,
+   "perdida_%": 53.7
+  },
+  {
+   "clase": "STTC",
+   "registros": 5235,
+   "con_una_sola_superclase": 2400,
+   "perdida_%": 54.2
+  },
+  {
+   "clase": "CD",
+   "registros": 4898,
+   "con_una_sola_superclase": 1708,
+   "perdida_%": 65.1
+  },
+  {
+   "clase": "HYP",
+   "registros": 2649,
+   "con_una_sola_superclase": 535,
+   "perdida_%": 79.8
+  }
+ ]
+}

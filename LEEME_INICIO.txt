@@ -1,0 +1,15 @@
+PTB-XL Visual Analytics: cómo abrir la plataforma
+
+Requisito: tener Python 3.10 o superior (https://www.python.org/downloads/). Nada más.
+
+1. Descomprima esta carpeta completa en cualquier lugar.
+2. Abra la plataforma:
+   - Mac:      doble clic en INICIAR_Mac.command
+               (si macOS lo bloquea la primera vez: clic derecho > Abrir > Abrir)
+   - Windows:  doble clic en INICIAR_Windows.bat
+               (si aparece "Windows protegió su PC": Más información > Ejecutar de todas formas)
+3. La primera vez instala las librerías (~1 minuto, necesita internet). Luego se abre el navegador solo en http://localhost:8010 (o el primer puerto libre siguiente).
+4. Para cerrar, cierre la ventana negra / de Terminal.
+
+Recomendado: Chrome, Brave o Safari. Se usa el conjunto de prueba (1.650 ECG). El gráfico D3 se carga de internet.
+Si no se abre solo, escriba en el navegador la dirección que aparece en la ventana.

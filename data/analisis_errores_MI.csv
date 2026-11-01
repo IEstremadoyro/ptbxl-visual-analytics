@@ -1,0 +1,33 @@
+variable,grupo,n,recall_MI,confunde_con
+mi_subclase,AMI,160,0.556,STTC
+mi_subclase,IMI,313,0.722,NORM
+mi_subclase,LMI,15,0.267,STTC
+mi_subclase,PMI,1,0.0,STTC
+mi_codigo,ALMI,5,0.2,STTC
+mi_codigo,AMI,24,0.292,NORM
+mi_codigo,ASMI,105,0.638,STTC
+mi_codigo,ILMI,42,0.905,CD
+mi_codigo,IMI,260,0.688,NORM
+mi_codigo,INJAL,9,0.444,STTC
+mi_codigo,INJAS,14,0.643,STTC
+mi_codigo,INJIL,2,0.5,STTC
+mi_codigo,INJIN,1,1.0,
+mi_codigo,INJLA,3,0.333,STTC
+mi_codigo,IPLMI,5,0.8,STTC
+mi_codigo,IPMI,3,1.0,
+mi_codigo,LMI,15,0.267,STTC
+mi_codigo,PMI,1,0.0,STTC
+etapa_infarto,Stadium I,12,0.833,NORM
+etapa_infarto,Stadium II,10,1.0,
+etapa_infarto,Stadium II-III,108,0.704,NORM
+etapa_infarto,Stadium III,71,0.746,STTC
+etapa_infarto,unknown,288,0.59,NORM
+validado_humano,True,489,0.652,NORM
+ruido,con ruido,149,0.604,NORM
+ruido,sin ruido,340,0.674,NORM
+edad_grupo,50-64,148,0.615,NORM
+edad_grupo,65-79,202,0.693,STTC
+edad_grupo,80+,92,0.663,STTC
+edad_grupo,<50,47,0.574,NORM
+sexo,hombre,277,0.711,NORM
+sexo,mujer,212,0.575,NORM

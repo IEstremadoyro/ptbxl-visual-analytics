@@ -1,0 +1,19 @@
+{
+ "km_dominante": {
+  "0": "CD",
+  "1": "NORM",
+  "2": "STTC",
+  "3": "NORM",
+  "4": "MI"
+ },
+ "km_tamano_train": {
+  "0": 1278,
+  "1": 1164,
+  "2": 2643,
+  "3": 5514,
+  "4": 2358
+ },
+ "dbscan_eps": 0.004137563519179821,
+ "k_vecinos": 10,
+ "nota": "K-means k=5 y DBSCAN (coseno, min_samples=10) ajustados con entrenamiento; db=-1 es ruido"
+}

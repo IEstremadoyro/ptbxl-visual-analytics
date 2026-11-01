@@ -1,0 +1,14 @@
+# Datos pesados (se descargan aparte, ver README)
+data/senales_norm_f16.npy
+data/records100/
+data/*.zip
+# Python / entornos
+venv/
+.venv/
+__pycache__/
+*.pyc
+# Sistema
+.DS_Store
+# Credenciales (nunca subir)
+acceso.env
+.env

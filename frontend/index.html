@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PTB-XL Visual Analytics</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/comparar.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+    <header class="top">
+        <div>
+            <h1>Plataforma de análisis clínico: PTB-XL</h1>
+            <p>¿Dónde están los pacientes con infarto (MI) y en qué casos falla el modelo?</p>
+        </div>
+        <div class="buscador">
+            <input id="buscar" type="number" placeholder="ECG id" aria-label="ECG id">
+            <button id="btn-buscar">Ir</button>
+            <button id="btn-frontera"
+                title="Selecciona al azar un MI de la cohorte actual que el modelo no reconoce">Caso frontera
+                MI</button>
+            <button id="btn-patron" type="button" title="Dónde difieren, en la señal, los infartos perdidos de los detectados">Patrón de los perdidos</button>
+            <button id="btn-pruebas" type="button" title="Distancias, vecinos lejanos, K-means, DBSCAN y preprocesamiento: resultados de apoyo">Pruebas de apoyo</button>
+        </div>
+    </header>
+
+    <main class="layout">
+        <!-- MACRO: A y B -->
+        <aside class="macro">
+            <div class="panel">
+                <h2>A · Composición de cohortes <span class="tag">MACRO · T1</span></h2>
+                <div class="filtro">
+                    <label>Conjunto de datos</label>
+                    <div id="f-split" class="seg">
+                        <button data-v="all">Todos</button>
+                        <button data-v="train">Train</button>
+                        <button data-v="val">Val</button>
+                        <button data-v="test" class="on">Test</button>
+                    </div>
+                </div>
+                <div class="filtro">
+                    <label for="f-sexo">Sexo</label>
+                    <select id="f-sexo" autocomplete="off">
+                        <option value="all">Todos</option>
+                        <option value="0">Hombre</option>
+                        <option value="1">Mujer</option>
+                    </select>
+                </div>
+                <div class="filtro">
+                    <label>Edad: <span id="v-edad">0–90+</span></label>
+                    <input id="f-emin" type="range" min="0" max="90" value="0" autocomplete="off">
+                    <input id="f-emax" type="range" min="0" max="90" value="90" autocomplete="off">
+                </div>
+                <div class="filtro">
+                    <label class="check"><input id="f-front" type="checkbox" autocomplete="off"> Solo MI mal
+                        clasificados</label>
+                </div>
+                <div id="donut"></div>
+                <ul id="leyenda-donut" class="lista"></ul>
+                <p id="stats" class="stats"></p>
+            </div>
+
+            <div class="panel">
+                <h2>B · Matriz de coocurrencia <span class="tag">MACRO · T1</span></h2>
+                <table id="cooc" class="mat"></table>
+                <p id="cooc-nota" class="nota"></p>
+            </div>
+        </aside>
+
+        <section class="col">
+            <!-- MESO: C, D y E -->
+            <div class="fila-meso">
+                <div class="panel meso">
+                    <div class="cabecera">
+                        <h2>C · Mapa del espacio latente <span class="tag">MESO · T2 · T3</span></h2>
+                        <div class="ctrl">
+                            <select id="s-proy" aria-label="Proyección" autocomplete="off">
+                                <option value="umap">UMAP</option>
+                                <option value="tsne">t-SNE</option>
+                            </select>
+                            <select id="s-color" aria-label="Colorear por" autocomplete="off">
+                                <option value="label">Color: etiqueta real</option>
+                                <option value="pred">Color: predicción</option>
+                                <option value="ambig">Color: acuerdo con vecinos</option>
+                                <option value="knn">Color: predicción del kNN (coseno)</option>
+                                <option value="km">Color: grupo de K-means</option>
+                            </select>
+                            <button id="btn-lazo"
+                                title="Dibuja una región en el mapa para analizar solo esos registros">Lazo</button>
+                            <button id="btn-limpiar" title="Deja el mapa como al empezar: quita el lazo, las selecciones y el paciente elegido (también con la tecla Esc)">Limpiar
+                                selección</button>
+                            <button id="btn-reset">Restablecer zoom</button>
+                        </div>
+                    </div>
+                    <p id="aviso" class="aviso"></p>
+                    <div id="scatter-wrap">
+                        <canvas id="scatter"></canvas>
+                        <div id="tip" class="tip"></div>
+                    </div>
+                    <div id="leyenda-meso" class="leyenda"></div>
+                    <p class="nota">Al elegir un paciente se dibujan sus 10 vecinos (registros de entrenamiento, aunque el
+                        filtro sea Test) con su número de orden: 1 es el más cercano en el espacio de 64 números, no en el
+                        mapa. Clic en un vecino: elegirlo. Mayús + clic en cualquier punto: comparar su señal.</p>
+                </div>
+
+                <div class="col2">
+                    <div class="panel">
+                        <h2>D · Matriz de confusión <span class="tag">MESO · T2 · T3</span></h2>
+                        <table id="cm" class="mat cm"></table>
+                        <p class="nota">Filas: clase real · Columnas: predicha. Clic en una celda para resaltarla en el
+                            mapa.</p>
+                    </div>
+                    <div class="panel panel-err">
+                        <div class="cabecera">
+                            <h2>E · Errores de MI por subgrupo <span class="tag">MESO · T3</span></h2>
+                            <select id="s-var" aria-label="Variable" autocomplete="off">
+                                <option value="sub">Subtipo de infarto</option>
+                                <option value="sexo">Sexo</option>
+                                <option value="edad">Edad</option>
+                                <option value="ruido">Ruido</option>
+                                <option value="etapa">Etapa del infarto</option>
+                            </select>
+                        </div>
+                        <div id="err"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MICRO: F y G -->
+            <div class="panel micro">
+                <h2>F y G · Paciente <span class="tag">MICRO · T3</span></h2>
+                <div id="vacio" class="vacio">Haz clic en un punto del mapa, busca un ECG id o pulsa «Caso frontera MI».
+                </div>
+                <div id="detalle" class="cuerpo" hidden>
+                    <div class="ficha">
+                        <h3 id="f-titulo"></h3>
+                        <p id="f-meta" class="meta"></p>
+                        <div id="f-badges" class="badges"></div>
+                        <div id="f-probs"></div>
+                        <p id="f-knn" class="knn"></p>
+                        <div id="f-interp" class="interp"></div>
+                        <p class="sub">Vecinos más cercanos (número = distancia coseno ×10<sup>-3</sup>)</p>
+                        <div id="f-vecinos" class="chips"></div>
+                        <button id="btn-comparar" type="button" disabled title="Ventana con los 10 vecinos en paralelo y la zona donde difiere el caso">Comparar con los 10 vecinos</button>
+                    </div>
+                    <div class="ecgcol">
+                        <div class="ecg-ctrl">
+                            <select id="s-lead" aria-label="Derivación" autocomplete="off"></select>
+                            <select id="s-vec" aria-label="Comparar con un vecino" autocomplete="off"></select>
+                            <input id="i-otro" type="number" placeholder="Otro ECG id" aria-label="Comparar con otro ECG id">
+                            <label class="check" title="Desplaza la señal comparada para que su complejo QRS más marcado de los primeros 2 s coincida con el del paciente. Es solo un ajuste visual."><input id="c-alinear" type="checkbox" autocomplete="off"> Alinear latidos</label>
+                            <button id="btn-sig"
+                                title="Pasa al siguiente caso de la selección actual (por ejemplo, una celda de la matriz de confusión)">Siguiente caso</button>
+                        </div>
+                        <p id="ecg-ley" class="ecg-ley"></p>
+                        <div id="ecg-wrap"><svg id="ecg"></svg></div>
+                        <p class="nota">Señal filtrada 0,5–40 Hz en mV. Rueda del ratón para ampliar el tiempo. Se puede
+                            comparar con un vecino, con cualquier ECG id o con Mayús + clic sobre otro punto del mapa.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <dialog id="dlg-patron" aria-labelledby="pat-titulo">
+        <div class="c-top"><h2 id="pat-titulo">Patrón de los infartos perdidos</h2><button id="pat-cerrar" type="button">Cerrar</button></div>
+        <div id="pat-cuerpo" class="pat">
+          <p class="pat-idea"><b>Idea principal:</b> los infartos que la red no detecta (83) <b>se parecen más a un ECG normal</b> que los que sí detecta (173). Su señal tiene menos «huella» de infarto.</p>
+
+          <h3 class="pt-h">1 · ¿Se parecen más a un latido normal o a uno de infarto?</h3>
+          <p class="pt-p">Para cada infarto se compara su latido medio con dos modelos: el latido normal típico y el latido de infarto típico, y se ve con cuál se parece más.</p>
+          <div class="pt-dos">
+            <div class="pt-card"><b class="pt-n">43 %</b><span>de los infartos <b>perdidos</b> (36 de 83) se parecen más al latido <b>normal</b></span></div>
+            <div class="pt-card det"><b class="pt-n">18 %</b><span>de los infartos <b>detectados</b> (31 de 173) se parecen más al latido <b>normal</b></span></div>
+          </div>
+
+          <h3 class="pt-h">2 · ¿En qué derivaciones se nota la diferencia?</h3>
+          <p class="pt-p">Cada barra indica cuánto se aleja el latido del latido normal típico (más larga = más alejado = más claro el infarto). En casi todas las derivaciones los perdidos se alejan menos. La diferencia es mayor en <b>III, aVF y aVL</b> (marcadas).</p>
+          <div class="pt-ley"><span><i class="p"></i>Infartos perdidos (83)</span><span><i class="d"></i>Infartos detectados (173)</span></div>
+          <div class="pt-graf">
+<div class="pt-fila"><span class="pt-d">I</span>
+      <div class="pt-b"><i class="p" style="width:20.7%"></i><em>6 %</em></div>
+      <div class="pt-b"><i class="d" style="width:23.6%"></i><em>7 %</em></div></div>
+<div class="pt-fila"><span class="pt-d">II</span>
+      <div class="pt-b"><i class="p" style="width:20.1%"></i><em>6 %</em></div>
+      <div class="pt-b"><i class="d" style="width:26.2%"></i><em>8 %</em></div></div>
+<div class="pt-fila res"><span class="pt-d">III</span>
+      <div class="pt-b"><i class="p" style="width:73.2%"></i><em>22 %</em></div>
+      <div class="pt-b"><i class="d" style="width:92.0%"></i><em>28 %</em></div></div>
+<div class="pt-fila"><span class="pt-d">aVR</span>
+      <div class="pt-b"><i class="p" style="width:17.3%"></i><em>5 %</em></div>
+      <div class="pt-b"><i class="d" style="width:20.9%"></i><em>6 %</em></div></div>
+<div class="pt-fila res"><span class="pt-d">aVL</span>
+      <div class="pt-b"><i class="p" style="width:39.3%"></i><em>12 %</em></div>
+      <div class="pt-b"><i class="d" style="width:46.9%"></i><em>14 %</em></div></div>
+<div class="pt-fila res"><span class="pt-d">aVF</span>
+      <div class="pt-b"><i class="p" style="width:34.1%"></i><em>10 %</em></div>
+      <div class="pt-b"><i class="d" style="width:44.4%"></i><em>13 %</em></div></div>
+<div class="pt-fila"><span class="pt-d">V1</span>
+      <div class="pt-b"><i class="p" style="width:17.5%"></i><em>5 %</em></div>
+      <div class="pt-b"><i class="d" style="width:19.5%"></i><em>6 %</em></div></div>
+<div class="pt-fila"><span class="pt-d">V2</span>
+      <div class="pt-b"><i class="p" style="width:22.7%"></i><em>7 %</em></div>
+      <div class="pt-b"><i class="d" style="width:26.9%"></i><em>8 %</em></div></div>
+<div class="pt-fila"><span class="pt-d">V3</span>
+      <div class="pt-b"><i class="p" style="width:23.7%"></i><em>7 %</em></div>
+      <div class="pt-b"><i class="d" style="width:30.2%"></i><em>9 %</em></div></div>
+<div class="pt-fila"><span class="pt-d">V4</span>
+      <div class="pt-b"><i class="p" style="width:17.8%"></i><em>5 %</em></div>
+      <div class="pt-b"><i class="d" style="width:22.4%"></i><em>7 %</em></div></div>
+<div class="pt-fila"><span class="pt-d">V5</span>
+      <div class="pt-b"><i class="p" style="width:15.8%"></i><em>5 %</em></div>
+      <div class="pt-b"><i class="d" style="width:19.3%"></i><em>6 %</em></div></div>
+<div class="pt-fila"><span class="pt-d">V6</span>
+      <div class="pt-b"><i class="p" style="width:17.3%"></i><em>5 %</em></div>
+      <div class="pt-b"><i class="d" style="width:20.0%"></i><em>6 %</em></div></div>
+          </div>
+
+          <h3 class="pt-h">3 · ¿Importa la zona del infarto?</h3>
+          <div class="pt-dos">
+            <div class="pt-card det"><b class="pt-n">75 %</b><span>de los infartos <b>inferiores</b> se detectan (125 de 167)</span></div>
+            <div class="pt-card"><b class="pt-n">55 %</b><span>de los infartos <b>anteriores</b> se detectan (47 de 85)</span></div>
+          </div>
+
+          <details class="pt-det"><summary>Ver el mapa de calor completo (detalle técnico)</summary>
+            <img src="/static/patron_mapa.png" alt="Mapa de calor de la desviación respecto al latido normal por derivación y tiempo" width="100%">
+            <p class="pt-p">Cada fila es una derivación y cada columna un instante alrededor del latido (0 = pico R). Más oscuro = el latido se aleja más del normal. Los paneles de perdidos y detectados se ven parecidos porque ambos se alejan del normal en el mismo sitio (el QRS); lo que cambia es la intensidad, y eso muestra el panel de la derecha, que resta uno del otro.</p>
+          </details>
+          <p class="pat-aviso"><b>Ojo.</b> Es una descripción, no una explicación del error. Que la red acierte más en los infartos que más se alejan del normal es en parte esperable. Resultado de un solo entrenamiento, 256 infartos de prueba y sin revisión de un cardiólogo.</p>
+        </div>
+    </dialog>
+    <dialog id="dlg-pruebas" aria-labelledby="pru-titulo">
+        <div class="c-top"><h2 id="pru-titulo">Pruebas de apoyo: ¿por qué se pierden los infartos?</h2><button id="pru-cerrar" type="button">Cerrar</button></div>
+        <div id="pru-cuerpo"></div>
+    </dialog>
+    <dialog id="dlg-comp" aria-labelledby="comp-titulo">
+        <div class="c-top"><h2 id="comp-titulo">Comparación con los vecinos</h2><button id="comp-cerrar" type="button">Cerrar</button></div>
+        <div id="comp-cuerpo"></div>
+    </dialog>
+    <script src="/static/app.js"></script>
+    <script src="/static/comparar.js"></script>
+    <script src="/static/pruebas.js"></script>
+</body>
+
+</html>

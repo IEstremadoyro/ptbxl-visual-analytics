@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\caption{Métricas sobre el mapa 2D (fold de test). En negrita, el mejor valor de cada columna.}
+\label{tab:proyecciones}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lccccc}
+\toprule
+Proyección & kNN & Silh. & Recall MI & AUC MI & Trust. \\
+\midrule
+Señal cruda + UMAP & 0,527 & -0,072 & 0,047 & 0,543 & 0,668 \\
+Características + UMAP & 0,588 & -0,067 & 0,191 & 0,695 & 0,834 \\
+Embedding solo CE + UMAP & \textbf{0,785} & 0,071 & \textbf{0,578} & 0,890 & 0,949 \\
+Embedding CE+SupCon + UMAP & 0,772 & \textbf{0,077} & 0,570 & \textbf{0,896} & 0,969 \\
+Embedding CE+SupCon + t-SNE & 0,775 & 0,034 & 0,559 & 0,893 & \textbf{0,986} \\
+\bottomrule
+\end{tabular}
+\end{table}

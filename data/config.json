@@ -1,0 +1,20 @@
+{
+ "seed": 42,
+ "fs": 100,
+ "filtro_hz": [
+  0.5,
+  40
+ ],
+ "folds": {
+  "train": "1-8",
+  "val": 9,
+  "test": 10
+ },
+ "modelo_dashboard": "CE+SupCon",
+ "alpha_supcon": 0.5,
+ "epocas_max": 60,
+ "paciencia": 12,
+ "batch": 128,
+ "n_registros": 16244,
+ "n_train": 12957
+}

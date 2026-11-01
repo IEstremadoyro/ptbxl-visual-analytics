@@ -1,0 +1,37 @@
+{
+ "Señal cruda + UMAP": {
+  "knn_acc_2D": 0.527,
+  "silhouette_2D": -0.072,
+  "recall_MI_2D": 0.047,
+  "auc_MI_2D": 0.543,
+  "trustworthiness": 0.668
+ },
+ "Características + UMAP": {
+  "knn_acc_2D": 0.588,
+  "silhouette_2D": -0.067,
+  "recall_MI_2D": 0.191,
+  "auc_MI_2D": 0.695,
+  "trustworthiness": 0.834
+ },
+ "Embedding solo CE + UMAP": {
+  "knn_acc_2D": 0.787,
+  "silhouette_2D": 0.073,
+  "recall_MI_2D": 0.602,
+  "auc_MI_2D": 0.885,
+  "trustworthiness": 0.949
+ },
+ "Embedding CE+SupCon + UMAP": {
+  "knn_acc_2D": 0.775,
+  "silhouette_2D": 0.079,
+  "recall_MI_2D": 0.582,
+  "auc_MI_2D": 0.898,
+  "trustworthiness": 0.972
+ },
+ "Embedding CE+SupCon + t-SNE": {
+  "knn_acc_2D": 0.774,
+  "silhouette_2D": 0.028,
+  "recall_MI_2D": 0.57,
+  "auc_MI_2D": 0.897,
+  "trustworthiness": 0.987
+ }
+}
